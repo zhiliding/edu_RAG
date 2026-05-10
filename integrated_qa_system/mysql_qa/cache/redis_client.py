@@ -58,6 +58,12 @@ class RedisClient:
             # 从 Redis 获取答案
             answer = self.client.get(f"answer:{query}")
             if answer:
+                # 尝试解析 JSON 格式的答案
+                try:
+                    import json
+                    answer = json.loads(answer)
+                except (json.JSONDecodeError, TypeError):
+                    pass
                 # 记录获取成功
                 self.logger.info(f"从 Redis 获取答案: {query}")
                 # 返回答案
@@ -69,6 +75,9 @@ class RedisClient:
             self.logger.error(f"Redis 查询失败: {e}")
             # 返回 None
             return None
+    # ... existing code ...
+
+
 if __name__ == '__main__':
     redcli = RedisClient()
     print(redcli)

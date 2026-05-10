@@ -1,15 +1,18 @@
 from integrated_qa_system.base import Config, logger
 
-# retrieval/bm25_search.py
-from integrated_qa_system.mysql_qa.cache.redis_client import RedisClient
-from integrated_qa_system.mysql_qa.db.mysql_client import MySQLClient
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from cache.redis_client import RedisClient
+from db.mysql_client import MySQLClient
 
 # 导入 BM25 算法
 from rank_bm25 import BM25Okapi
 # 导入数值计算库
 import numpy as np
 # 导入文本预处理
-from integrated_qa_system.mysql_qa.utils.preprocess import preprocess_text
+from utils.preprocess import preprocess_text
 # 导入日志
 
 class BM25Search:
@@ -69,7 +72,7 @@ class BM25Search:
         if not query or not isinstance(query, str):
             # 记录无效查询
             self.logger.error("无效查询")
-            # 返回 None 和 False
+            # 返回    None 和 False
             return None, False
         # 检查 Redis 缓存
         cached_answer = self.redis_client.get_answer(query)
@@ -111,9 +114,18 @@ class BM25Search:
             return None, True
 
 if __name__ == "__main__":
-    # 创建 Redis 客户端
-    redis_client = RedisClient()
-    # 创建 MySQL 客户端
-    mysql_client = MySQLClient()
-    # 创建 BM25 搜索对象
-    bm25_search = BM25Search(redis_client, mysql_client)
+    if __name__ == "__main__":
+        # 创建 Redis 客户端
+        redis_client = RedisClient()
+        # 创建 MySQL 客户端
+        mysql_client = MySQLClient()
+        # 创建 BM25 搜索对象
+        bm25_search = BM25Search(redis_client, mysql_client)
+        # bm25_search._load_data()
+        # bm25_search.search("如何使用mysql?")
+        answer, need_fallback = bm25_search.search("如何在 Ubuntu 中快速创建Pycharm桌面快捷方式？")
+        if answer:
+            print(f"答案: {answer}")
+            print(f"是否需要降级处理: {need_fallback}")
+        else:
+            print("未找到答案")

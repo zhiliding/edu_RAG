@@ -27,6 +27,7 @@ class MySQLQASystem:
         self.logger.info(f"处理查询: '{query}'")
         # 执行 BM25 搜索
         answer, _ = self.bm25_search.search(query, threshold=0.85)
+        # print(f"answer:{answer},_:{_}")
         if answer:
             # 记录 MySQL 答案
             self.logger.info(f"MySQL 答案: {answer}")

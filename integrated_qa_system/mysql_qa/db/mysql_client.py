@@ -18,7 +18,8 @@ class MySQLClient:
                 host=Config().MYSQL_HOST,
                 user=Config().MYSQL_USER,
                 password=Config().MYSQL_PASSWORD,
-                database=Config().MYSQL_DATABASE
+                database=Config().MYSQL_DATABASE,
+                charset="utf8mb4",
             )
             # 创建游标
             self.cursor = self.connection.cursor()
@@ -28,6 +29,21 @@ class MySQLClient:
             # 记录连接失败
             self.logger.error(f"MySQL 连接失败: {e}")
             raise
+
+    def ensure_alive(self):
+        """空闲过久后 MySQL 会断开，执行 SQL 前先保活/重连"""
+        try:
+            self.connection.ping(reconnect=True)
+        except pymysql.MySQLError as e:
+            self.logger.warning(f"MySQL 重连: {e}")
+            self.connection = pymysql.connect(
+                host=Config().MYSQL_HOST,
+                user=Config().MYSQL_USER,
+                password=Config().MYSQL_PASSWORD,
+                database=Config().MYSQL_DATABASE,
+                charset="utf8mb4",
+            )
+            self.cursor = self.connection.cursor()
 
     def create_table(self):
         create_table_query = """
